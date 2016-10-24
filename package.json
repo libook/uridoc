@@ -1,0 +1,29 @@
+{
+  "name": "uridoc",
+  "version": "0.0.0",
+  "description": "An URI document generator which works with JSDoc-type comments.",
+  "keywords": [
+    "URI",
+    "document",
+    "JSDoc",
+    "API",
+    "REST",
+    "HTTP"
+  ],
+  "homepage": "https://github.com/libook/uridoc",
+  "bugs": {
+    "url": "https://github.com/libook/uridoc/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "LiBook",
+    "email": "libook7@gmail.com",
+    "url": "https://github.com/libook"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/libook/uridoc.git"
+  },
+  "private": false,
+  "dependencies": {}
+}
