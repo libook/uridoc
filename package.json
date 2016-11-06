@@ -1,6 +1,6 @@
 {
   "name": "uridoc",
-  "version": "0.0.0",
+  "version": "0.0.5",
   "description": "An URI document generator which works with JSDoc-type comments.",
   "keywords": [
     "URI",
@@ -25,5 +25,10 @@
     "url": "https://github.com/libook/uridoc.git"
   },
   "private": false,
-  "dependencies": {}
+  "bin": {
+    "uridoc": "./index.js"
+  },
+  "dependencies": {
+    "co": "^4.6.0"
+  }
 }
