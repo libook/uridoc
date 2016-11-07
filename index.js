@@ -147,10 +147,22 @@ let classify = function (lines) {
     return classStrings;
 };
 
+/**
+ * Processor of description part.
+ * @param {Array} lines
+ * @return {string}
+ */
 let descriptionProcessor = function (lines) {
     return lines.join('\n');
 };
 
+/**
+ * Loop a part to run processors.
+ * This is only for request and response.
+ * @param {Object} partStringObject - Original string data.
+ * @param {Array} processors - Array of processors.
+ * @return {{}}
+ */
 function loopPart(partStringObject, processors) {
     let partObject = {};
     for (let processor of processors) {
@@ -159,6 +171,11 @@ function loopPart(partStringObject, processors) {
     return partObject;
 }
 
+/**
+ * Processor for "{Type} name - description" lines.
+ * @param {Array} nameValues
+ * @return {Array}
+ */
 function nameValueProcessor(nameValues) {
     let objectArray = [];
     nameValues.forEach(function (nameValue) {
@@ -176,11 +193,21 @@ function nameValueProcessor(nameValues) {
     return objectArray;
 }
 
+/**
+ * Processor for json.
+ * When this is not valid json, this will return a row string.
+ * @param {Array} lines
+ * @return {*}
+ */
 function jsonStringProcessor(lines) {
-    let jsonString = lines.join('\n')
-        .replace(/(\{[^:}]+})/g, '"$1"');
-    let json = JSON.parse(jsonString);
-    return JSON.stringify(json, null, 2).replace(/"(\{[^:}]+})"/g, '$1');
+    let rowString = lines.join('\n');
+    let jsonString = rowString.replace(/(\{[^:}]+})/g, '"$1"');
+    try {
+        let json = JSON.parse(jsonString);
+        return JSON.stringify(json, null, 2).replace(/"(\{[^:}]+})"/g, '$1');
+    } catch (error) {
+        return rowString;
+    }
 }
 
 let requestProcessors = [
