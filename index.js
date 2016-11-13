@@ -257,18 +257,101 @@ let interpreter = function (classStrings) {
     return docObject;
 };
 
+/**
+ * JSON to markdown
+ * @param {Object} json
+ * @return {string}
+ * @constructor
+ */
+let JSON2markdown = function (json) {
+    let markdown = '';
+
+    markdown += '## ' + json.method.toUpperCase() + ' ' + json.uri + '\n\n';
+
+    markdown += json.description + '\n\n';
+
+    /**
+     * Make table.
+     * @param {String} objectName
+     * @param {Array} objectArray - Array of object which contain name, type and description.
+     * @return {string}
+     */
+    function keyValueTable(objectName, objectArray) {
+        let tableString = '';
+        tableString += '#### ' + objectName + ':\n\n';
+        tableString += ''
+            + 'Name | Type | Description\n'
+            + '---- | ---- | -----------\n';
+        for (let line of objectArray) {
+            tableString += line.name + ' | ' + line.type + ' | ' + line.description + '\n';
+        }
+        tableString += '\n';
+        return tableString;
+    }
+
+    if (json.request) {
+        markdown += '### Request:\n\n';
+        if (json.request.headers) {
+            markdown += keyValueTable('Headers', json.request.headers);
+        }
+        if (json.request.params) {
+            markdown += keyValueTable('Headers', json.request.params);
+        }
+        if (json.request.query) {
+            markdown += keyValueTable('Headers', json.request.query);
+        }
+        if (json.request.body) {
+            markdown += '#### Body:\n\n'
+                + '```javascript\n'
+                + json.request.body + '\n'
+                + '```\n\n';
+        }
+    }
+    if (json.response) {
+        markdown += '### Response:\n\n';
+        if (json.response.headers) {
+            markdown += keyValueTable('Headers', json.request.headers);
+        }
+        if (json.response.body) {
+            markdown += '#### Body:\n\n'
+                + '```javascript\n'
+                + json.response.body + '\n'
+                + '```\n\n';
+        }
+    }
+    return markdown;
+};
+
+/**
+ * Promise for FS.appendFile
+ * @param {String} path - File path
+ * @param {String} data - Content
+ * @return {Promise}
+ */
+let appendFile = function (path, data) {
+    return new Promise(function (resolve, reject) {
+        FS.appendFile(path, data, 'utf8', function (error, content) {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(content);
+            }
+        });
+    });
+};
+
 co(function *() {
     let content = yield readFile(process.argv[2]);
+    let targetFile = process.argv[3];
     let matches = pickJSDocs(content);
     let uriDocStrings = filterUri(matches);
-    let documents = [];
-    uriDocStrings.forEach(function (uriDocString) {
+    for (let uriDocString of uriDocStrings) {
         let lines = splitDoc(uriDocString);
         let classStrings = classify(lines);
         let docObject = interpreter(classStrings);
-        documents.push(docObject);
-    });
-    console.log(JSON.stringify(documents, null, 2));
+        let markdown = JSON2markdown(docObject);
+        yield appendFile(targetFile, markdown);
+    }
 }).catch(function (error) {
     console.error(error.stack);
 });
