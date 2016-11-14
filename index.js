@@ -32,19 +32,19 @@ let readFile = function (path) {
 
 /**
  * @uri
- * 这是一个测试API
- * 主要用于测试
+ * This is a test API.
+ * Just for testing.
  * @get /api/v1/:param1/test/:param2
  * @request
  *      @headers
- *          {String} header1 - 头1
- *          {Number} header2 - 头2
+ *          {String} header1 - First header.
+ *          {Number} header2 - Second header.
  *      @params
- *          {String} param1 - 参数1
- *          {Number} param2 - 参数2
+ *          {String} param1 - First param.
+ *          {Number} param2 - Second param.
  *      @query
- *          {String} query1 - 查询1
- *          {Number} query2 - 查询2
+ *          {String} query1 - First query.
+ *          {Number} query2 - Second query.
  *      @body
  *          {
  *              "a": {String},
@@ -52,8 +52,8 @@ let readFile = function (path) {
  *          }
  * @response
  *      @headers
- *          {String} rheader1 - 返回头1
- *          {Number} rheader2 - 返回头2
+ *          {String} rheader1 - First header.
+ *          {Number} rheader2 - Second header
  *      @body
  *          {
  *              "c": {String},
@@ -153,7 +153,7 @@ let classify = function (lines) {
  * @return {string}
  */
 let descriptionProcessor = function (lines) {
-    return lines.join('\n');
+    return lines.join('\n\n');
 };
 
 /**

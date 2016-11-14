@@ -53,8 +53,9 @@ uridoc FileWithUriDefinition.js Document.md
 
 ## GET /api/v1/:param1/test/:param2
 
-这是一个测试API
-主要用于测试
+This is a test API.
+
+Just for testing.
 
 ### Request:
 
@@ -62,22 +63,22 @@ uridoc FileWithUriDefinition.js Document.md
 
 Name | Type | Description
 ---- | ---- | -----------
-header1 | {String} | 头1
-header2 | {Number} | 头2
+header1 | {String} | First header.
+header2 | {Number} | Second header.
 
 #### Headers:
 
 Name | Type | Description
 ---- | ---- | -----------
-param1 | {String} | 参数1
-param2 | {Number} | 参数2
+param1 | {String} | First param.
+param2 | {Number} | Second param.
 
 #### Headers:
 
 Name | Type | Description
 ---- | ---- | -----------
-query1 | {String} | 查询1
-query2 | {Number} | 查询2
+query1 | {String} | First query.
+query2 | {Number} | Second query.
 
 #### Body:
 
@@ -94,8 +95,8 @@ query2 | {Number} | 查询2
 
 Name | Type | Description
 ---- | ---- | -----------
-header1 | {String} | 头1
-header2 | {Number} | 头2
+header1 | {String} | First header.
+header2 | {Number} | Second header.
 
 #### Body:
 
