@@ -9,9 +9,7 @@
 /**
  * Including modules.
  */
-const co = require('co')
-    , FS = require('fs')
-    ;
+const FS = require('fs');
 
 /**
  * Read a file.
@@ -340,18 +338,22 @@ let appendFile = function (path, data) {
     });
 };
 
-co(function *() {
-    let content = yield readFile(process.argv[2]);
-    let targetFile = process.argv[3];
-    let matches = pickJSDocs(content);
-    let uriDocStrings = filterUri(matches);
-    for (let uriDocString of uriDocStrings) {
-        let lines = splitDoc(uriDocString);
-        let classStrings = classify(lines);
-        let docObject = interpreter(classStrings);
-        let markdown = JSON2markdown(docObject);
-        yield appendFile(targetFile, markdown);
+async function run() {
+    try {
+        let content = await readFile(process.argv[2]);
+        let targetFile = process.argv[3];
+        let matches = pickJSDocs(content);
+        let uriDocStrings = filterUri(matches);
+        for (let uriDocString of uriDocStrings) {
+            let lines = splitDoc(uriDocString);
+            let classStrings = classify(lines);
+            let docObject = interpreter(classStrings);
+            let markdown = JSON2markdown(docObject);
+            await appendFile(targetFile, markdown);
+        }
+    } catch (error) {
+        console.error(error.stack)
     }
-}).catch(function (error) {
-    console.error(error.stack);
-});
+}
+
+run();
