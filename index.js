@@ -29,6 +29,24 @@ let readFile = function (path) {
 };
 
 /**
+ * Write a file.
+ * @param {String} path
+ * @param {String} str
+ * @return {Promise}
+ */
+let writeFile = function (path, str) {
+    return new Promise(function (resolve, reject) {
+        FS.writeFile(path, str, 'utf8', function (error, content) {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(content);
+            }
+        });
+    });
+};
+
+/**
  * @uri
  * This is a test API.
  * Just for testing.
@@ -89,10 +107,11 @@ let filterUri = function (stringArray) {
  * @return {Array|*}
  */
 let splitDoc = function (doc) {
-    let lines = ('\n' + doc).split(/\n[\t *\/]*/g);
+    let lines = ('\n' + doc).split(/\n[\t ]*[*\/]*/g);
     for (let i = lines.length - 1; i >= 0; i--) {
         let line = lines[i];
-        switch (line) {
+        let lineNoSpaceStart = line.replace(/^[\t ]*/g, '');
+        switch (lineNoSpaceStart) {
             case '':
             case '@uri':
                 lines.splice(i, 1);
@@ -113,23 +132,25 @@ let classify = function (lines) {
     let className = 'description';
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
-        if (['@get', '@post', '@put', '@delete'].indexOf(line.replace(/ .*/, '').trim()) >= 0) {
+        let lineNoSpaceStart = line.replace(/^[\t ]*/g, '');
+
+        if (['@get', '@post', '@put', '@delete'].indexOf(lineNoSpaceStart.replace(/ .*/, '').trim()) >= 0) {
             /**
              * Methods.
              */
 
-            classStrings.method = line.replace(/ .*/, '').replace(/@/g, '').trim();
-            classStrings.uri = line.replace(/^[^ ]* /, '').trim();
-        } else if (['@request', '@response'].indexOf(line) >= 0) {
-            part = line.replace(/@/g, '');
-        } else if (line.indexOf('@') === 0) {
-            className = line.replace(/@/g, '');
+            classStrings.method = lineNoSpaceStart.replace(/ .*/, '').replace(/@/g, '').trim();
+            classStrings.uri = lineNoSpaceStart.replace(/^[^ ]* /, '').trim();
+        } else if (['@request', '@response'].indexOf(lineNoSpaceStart) >= 0) {
+            part = lineNoSpaceStart.replace(/@/g, '');
+        } else if (lineNoSpaceStart.indexOf('@') === 0) {
+            className = lineNoSpaceStart.replace(/@/g, '');
         } else {
             if (part === undefined) {
                 if (classStrings[className] === undefined) {
                     classStrings[className] = [];
                 }
-                classStrings[className].push(line);
+                classStrings[className].push(lineNoSpaceStart);
             } else {
                 if (classStrings[part] === undefined) {
                     classStrings[part] = {};
@@ -164,7 +185,13 @@ let descriptionProcessor = function (lines) {
 function loopPart(partStringObject, processors) {
     let partObject = {};
     for (let processor of processors) {
-        partObject[processor.name] = processor.processor(partStringObject[processor.name]);
+        let inputParam = partStringObject[processor.name];
+        if (inputParam !== undefined) {
+            let result = processor.processor(inputParam);
+            if (result !== undefined) {
+                partObject[processor.name] = result;
+            }
+        }
     }
     return partObject;
 }
@@ -262,7 +289,7 @@ let interpreter = function (classStrings) {
  * @constructor
  */
 let JSON2markdown = function (json) {
-    let markdown = '';
+    let markdown = '\n---\n';
 
     markdown += '## ' + json.method.toUpperCase() + ' ' + json.uri + '\n\n';
 
@@ -287,6 +314,37 @@ let JSON2markdown = function (json) {
         return tableString;
     }
 
+    function body2Markdown(body) {
+        let alignedBody = '';
+        {
+            /**
+             * Align rows.
+             */
+            let bodySplited = body.split('\n');
+            let removeSpaceCount = null;
+            for (let line of bodySplited) {
+                let spaceCount = line.replace(/[^ \t].*/g, '').length;
+                if (removeSpaceCount === null) {
+                    removeSpaceCount = spaceCount;
+                } else {
+                    if (spaceCount < removeSpaceCount) {
+                        removeSpaceCount = spaceCount;
+                    }
+                }
+            }
+            let bodySplitedAligned = [];
+            for (let line of bodySplited) {
+                bodySplitedAligned.push(line.substr(removeSpaceCount - 1));
+            }
+            alignedBody = bodySplitedAligned.join('\n');
+        }
+
+        return '#### Body:\n\n'
+            + '```javascript\n'
+            + alignedBody + '\n'
+            + '```\n\n';
+    }
+
     if (json.request) {
         markdown += '### Request:\n\n';
         if (json.request.headers) {
@@ -299,10 +357,7 @@ let JSON2markdown = function (json) {
             markdown += keyValueTable('Headers', json.request.query);
         }
         if (json.request.body) {
-            markdown += '#### Body:\n\n'
-                + '```javascript\n'
-                + json.request.body + '\n'
-                + '```\n\n';
+            markdown += body2Markdown(json.request.body);
         }
     }
     if (json.response) {
@@ -311,10 +366,7 @@ let JSON2markdown = function (json) {
             markdown += keyValueTable('Headers', json.request.headers);
         }
         if (json.response.body) {
-            markdown += '#### Body:\n\n'
-                + '```javascript\n'
-                + json.response.body + '\n'
-                + '```\n\n';
+            markdown += body2Markdown(json.response.body)
         }
     }
     return markdown;
@@ -344,6 +396,9 @@ async function run() {
         let targetFile = process.argv[3];
         let matches = pickJSDocs(content);
         let uriDocStrings = filterUri(matches);
+
+        await writeFile(targetFile, '');
+
         for (let uriDocString of uriDocStrings) {
             let lines = splitDoc(uriDocString);
             let classStrings = classify(lines);
