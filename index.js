@@ -351,10 +351,10 @@ let JSON2markdown = function (json) {
             markdown += keyValueTable('Headers', json.request.headers);
         }
         if (json.request.params) {
-            markdown += keyValueTable('Headers', json.request.params);
+            markdown += keyValueTable('URI Params', json.request.params);
         }
         if (json.request.query) {
-            markdown += keyValueTable('Headers', json.request.query);
+            markdown += keyValueTable('Query Params', json.request.query);
         }
         if (json.request.body) {
             markdown += body2Markdown(json.request.body);
