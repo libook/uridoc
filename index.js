@@ -226,13 +226,13 @@ function nameValueProcessor(nameValues) {
  */
 function jsonStringProcessor(lines) {
     let rowString = lines.join('\n');
-    let jsonString = rowString.replace(/(\{[^:}]+})/g, '"$1"');
-    try {
-        let json = JSON.parse(jsonString);
-        return JSON.stringify(json, null, 2).replace(/"(\{[^:}]+})"/g, '$1');
-    } catch (error) {
-        return rowString;
-    }
+    // let jsonString = rowString.replace(/(\{[^:}]+})/g, '"$1"');
+    // try {
+    //     let json = JSON.parse(jsonString);
+    //     return JSON.stringify(json, null, 2).replace(/"(\{[^:}]+})"/g, '$1');
+    // } catch (error) {
+    return rowString;
+    // }
 }
 
 let requestProcessors = [
