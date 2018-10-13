@@ -29,7 +29,7 @@
     "node": ">=7.6.0"
   },
   "bin": {
-    "uridoc": "./index.js"
+    "uridoc": "src/index.js"
   },
   "dependencies": {}
 }
