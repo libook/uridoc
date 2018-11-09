@@ -26,7 +26,7 @@
   },
   "private": false,
   "engines": {
-    "node": ">=7.6.0"
+    "node": ">=10.10.0"
   },
   "bin": {
     "uridoc": "src/index.js"

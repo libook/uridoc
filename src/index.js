@@ -10,23 +10,17 @@
  * Import modules.
  */
 
-const readFiles = require('./readFiles');
-const pickComments = require('./pickComments');
-const getStructure = require('./getStructure');
+const getUridomList = require('./getUridomList');
 const convertToMarkdown = require('./convertToMarkdown');
 const writeFiles = require('./writeFiles');
-const URIDOM = require('./URIDOM');
 
 /**
  * Run.
  */
 (async () => {
-    const sourceCode = await readFiles(process.argv[2]);
-    const commentList = pickComments(sourceCode);
+    const uridomList = await getUridomList();
     let markdownString = '';
-    for (let comment of commentList) {
-        const structure = getStructure(comment);
-        const uridom = new URIDOM(structure);
+    for (let uridom of uridomList) {
         markdownString += convertToMarkdown(uridom) + '\n';
     }
     await writeFiles(process.argv[3], markdownString);
