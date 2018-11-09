@@ -1,5 +1,5 @@
 /**
- * 在这里写文件描述
+ * Get comment structure.
  */
 
 'use strict';
