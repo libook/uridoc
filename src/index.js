@@ -24,4 +24,4 @@ const writeFiles = require('./writeFiles');
         markdownString += convertToMarkdown(uridom) + '\n';
     }
     await writeFiles(process.argv[3], markdownString);
-})();
+})().catch(console.error);

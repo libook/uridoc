@@ -31,5 +31,7 @@
   "bin": {
     "uridoc": "src/index.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "glob": "^7.1.4"
+  }
 }
