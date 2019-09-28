@@ -18,10 +18,14 @@ const URIDOM = require('./URIDOM');
  * @type {String[]}
  */
 const METHOD_SEQUENCE = [
-    "GET",
-    "POST",
-    "PUT",
-    "DELETE",
+    'OPTIONS',
+    'GET',
+    'HEAD',
+    'POST',
+    'PUT',
+    'DELETE',
+    'TRACE',
+    'CONNECT',
 ];
 
 /**
@@ -35,21 +39,7 @@ const sortUridom = (a, b) => {
     if (a.uri === b.uri) {
         const aSequence = METHOD_SEQUENCE.indexOf(a.method);
         const bSequence = METHOD_SEQUENCE.indexOf(b.method);
-        if (aSequence > -1 && bSequence > -1) {
-            return aSequence - bSequence;
-        } else if (aSequence === -1 && bSequence === -1) {
-            if (a.method > b.method) {
-                return 1;
-            } else {
-                return -1;
-            }
-        } else {
-            if (aSequence > -1) {
-                return -1;
-            } else {
-                return 1;
-            }
-        }
+        return aSequence - bSequence;
     } else {
         if (a.uri > b.uri) {
             return 1;
