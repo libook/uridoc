@@ -65,8 +65,14 @@ module.exports = async function () {
     const childrenBranches = [];
     for (let filePath of filePathList) {
         childrenBranches.push(readFile(filePath)
-            .then((sourceCode) => pickComments(sourceCode))
-            .then((commentList) => commentList.map(getStructure))
+            .then((sourceCode) => pickComments(sourceCode, filePath))
+            .then((fileWithContentList) => {
+                const structureList = [];
+                for (const comment of fileWithContentList.commentList) {
+                    structureList.push(getStructure(comment));
+                }
+                return structureList;
+            })
             .then((structureList) => structureList.forEach((structure) => {
                 uridomList.push(new URIDOM(structure));
             })));

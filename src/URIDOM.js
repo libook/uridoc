@@ -13,31 +13,35 @@ class ParameterTable {
      * @param {string} separator
      */
     constructor(subStructure, separator) {
-        this.table = [];
-        for (let keyValueString of subStructure.children.lines) {
-            const separatorIndex = keyValueString.content.indexOf(separator);
-            if (separatorIndex === -1) {
-                throw new Error(`Wrong format at "${keyValueString.content}".`);
+        if (subStructure.children && Array.isArray(subStructure.children.lineList)) {
+            this.table = [];
+            for (let keyValueString of subStructure.children.lineList) {
+                const separatorIndex = keyValueString.content.indexOf(separator);
+                if (separatorIndex === -1) {
+                    throw new Error(`Wrong format at "${keyValueString.content}".`);
+                }
+                this.table.push({
+                    "key": keyValueString.content.substring(0, separatorIndex).trim(),
+                    "value": keyValueString.content.substring(separatorIndex + 1).trim(),
+                });
             }
-            this.table.push({
-                "key": keyValueString.content.substring(0, separatorIndex).trim(),
-                "value": keyValueString.content.substring(separatorIndex + 1).trim(),
+            this.table.sort((a, b) => {
+                if (a.key > b.key) {
+                    return 1;
+                } else {
+                    return -1;
+                }
             });
+        } else {
+            throw new Error(`Didn't find any content below tag @${subStructure.tag} in ${subStructure.source.filePath} at line ${subStructure.source.number}`);
         }
-        this.table.sort((a, b) => {
-            if (a.key > b.key) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
     }
 }
 
 const processOneLevel = (subStructure, baseIndentation, father, keyName) => {
-    for (let line of subStructure.children.lines) {
+    for (let line of subStructure.children.lineList) {
         father[keyName] += `${subStructure.children.indentation.replace(new RegExp(`^${baseIndentation}`), '')}${line.content}\n`;
-        if (line.children.lines !== undefined) {
+        if (line.children.lineList !== undefined) {
             processOneLevel(line, baseIndentation, father, keyName);
         }
     }
@@ -91,7 +95,7 @@ const MessageParts = {
         constructor(bodyStructure) {
             this.MIMEType = bodyStructure.content || 'application/json';
             this.bodyContent = '';
-            if (bodyStructure.children.lines !== undefined) {
+            if (bodyStructure.children.lineList !== undefined) {
                 processOneLevel(bodyStructure, bodyStructure.children.indentation, this, 'bodyContent');
             }
         }
@@ -107,8 +111,12 @@ class Message {
      * @param {string} messageStructure.tag
      */
     constructor(messageStructure) {
-        for (let line of messageStructure.children.lines) {
-            this[line.tag] = new MessageParts[line.tag](line);
+        if (messageStructure.children && messageStructure.children.lineList) {
+            for (let line of messageStructure.children.lineList) {
+                this[line.tag] = new MessageParts[line.tag](line);
+            }
+        } else {
+            throw new Error(`Didn't find any content below tag @${messageStructure.tag} in ${messageStructure.source.filePath} at line ${messageStructure.source.number}`);
         }
     }
 }
@@ -152,7 +160,7 @@ module.exports = class URIDOM {
     /**
      * @param {object} structure
      * @param {string} structure.indentation
-     * @param {array} structure.lines
+     * @param {array} structure.lineList
      */
     constructor(structure) {
         this.description = '';
@@ -161,13 +169,13 @@ module.exports = class URIDOM {
         this.request = undefined;
         this.response = undefined;
 
-        for (let line of structure.lines) {
+        for (let line of structure.lineList) {
             /**
              * No tag, push into description.
              */
             if (!line.tag) {
                 this.description += line.content + '\n';
-                if (line.children.lines !== undefined) {
+                if (line.children.lineList !== undefined) {
                     processOneLevel(line, line.children.indentation, this, 'description');
                 }
             }
@@ -177,7 +185,11 @@ module.exports = class URIDOM {
              */
             else if (HTTP_METHOD_LIST.includes(line.tag.toUpperCase())) {
                 this.method = line.tag.toUpperCase();//GET POST PUT DELETE
-                this.uri = line.content;
+                if (line.content) {
+                    this.uri = line.content;
+                } else {
+                    throw new Error(`There should be uri after method in ${line.source.filePath} at line ${line.source.number}`);
+                }
             }
 
             /**
@@ -187,6 +199,13 @@ module.exports = class URIDOM {
                 this.request = new Request(line);
             } else if (line.tag === 'response') {
                 this.response = new Response(line);
+            }
+
+            /*
+            Throw error.
+             */
+            else {
+                throw new Error(`Unsupported tag "${line.tag}" in ${line.source.filePath} at line ${line.source.number}`);
             }
         }
     }

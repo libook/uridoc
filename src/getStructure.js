@@ -59,12 +59,23 @@ const getPureContent = (line, indentation) => line
     .slice(indentation.length)
     .replace(/(@[^ \t]+[ \t]+)|(@[^ \t]+$)/, '');// Remove tag.
 
-module.exports = (comment) => {
-    const lines = comment.split(/\n/);
+/*
+{
+    "filePath": String,
+    "lineList": [
+        {
+            "filePath": String,
+            "number": Number,
+            "content": String,
+        },
+    ],
+},
+ */
 
+module.exports = (comment) => {
     const structure = {
-        "indentation": getIndentation(lines[0]),
-        "lines": [],
+        "indentation": getIndentation(comment.lineList[0].content),
+        "lineList": [],
     };
 
     const stack = [];
@@ -73,22 +84,26 @@ module.exports = (comment) => {
     /**
      * Get the basic structure.
      */
-    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-        const line = lines[lineIndex];
-        if (line.startsWith(stack[0].indentation)) {
-            if (getIndentation(getPureContent(line, stack[0].indentation))) {
+    for (let lineIndex = 0; lineIndex < comment.lineList.length; lineIndex++) {
+        const line = comment.lineList[lineIndex];
+        if (line.content.startsWith(stack[0].indentation)) {
+            if (getIndentation(getPureContent(line.content, stack[0].indentation))) {
                 const newSubStructure = {
-                    "indentation": getIndentation(line),
-                    "lines": [],
+                    "indentation": getIndentation(line.content),
+                    "lineList": [],
                 };
-                stack[0].lines[stack[0].lines.length - 1].children = newSubStructure;
+                stack[0].lineList[stack[0].lineList.length - 1].children = newSubStructure;
                 stack.unshift(newSubStructure);
 
             }
-            stack[0].lines.push({
-                "tag": getTag(line),
-                "content": getPureContent(line, stack[0].indentation),
+            stack[0].lineList.push({
+                "tag": getTag(line.content),
+                "content": getPureContent(line.content, stack[0].indentation),
                 "children": {},
+                "source": {
+                    "number": line.number,
+                    "filePath": line.filePath,
+                },
             });
         } else {
             if (stack.length > 0) {
