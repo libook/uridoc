@@ -13,6 +13,52 @@ const getStructure = require('./getStructure');
 const glob = require('glob');
 const URIDOM = require('./URIDOM');
 
+/**
+ * For default RESTful methods.
+ * @type {String[]}
+ */
+const METHOD_SEQUENCE = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+];
+
+/**
+ * Compare function for sorting URIDOM list.
+ * Default RESTful methods are on the top.
+ * @param {URIDOM} a
+ * @param {URIDOM} b
+ * @returns {number}
+ */
+const sortUridom = (a, b) => {
+    if (a.uri === b.uri) {
+        const aSequence = METHOD_SEQUENCE.indexOf(a.method);
+        const bSequence = METHOD_SEQUENCE.indexOf(b.method);
+        if (aSequence > -1 && bSequence > -1) {
+            return aSequence - bSequence;
+        } else if (aSequence === -1 && bSequence === -1) {
+            if (a.method > b.method) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            if (aSequence > -1) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    } else {
+        if (a.uri > b.uri) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+};
+
 module.exports = async function () {
     const uridomList = [];
 
@@ -36,5 +82,6 @@ module.exports = async function () {
             })));
     }
     await Promise.all(childrenBranches);
+    uridomList.sort(sortUridom);
     return uridomList;
 };
