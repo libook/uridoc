@@ -1,6 +1,6 @@
 # URI Doc
 
-An URI document generator which works with JSDoc-type comments.
+Generate URI document from comments.
 
 ## Usage
 
@@ -14,6 +14,12 @@ npm install -g uridoc
 
 ```sh
 uridoc ./demo.js Document.md
+```
+
+Also support glob(must be with quotation marks):
+
+```sh
+uridoc "./**/*Routes.js" Document.md
 ```
 
 ## URI Definition Demo
