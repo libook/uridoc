@@ -56,6 +56,7 @@ const getTag = (line) => {
 };
 
 const getPureContent = (line, indentation) => line
+    .trimRight()
     .slice(indentation.length)
     .replace(/(@[^ \t]+[ \t]+)|(@[^ \t]+$)/, '');// Remove tag.
 

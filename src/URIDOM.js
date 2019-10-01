@@ -98,6 +98,7 @@ const MessageParts = {
             if (bodyStructure.children.lineList !== undefined) {
                 processOneLevel(bodyStructure, bodyStructure.children.indentation, this, 'bodyContent');
             }
+            this.bodyContent = this.bodyContent.trim();
         }
     },
 
