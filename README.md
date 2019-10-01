@@ -53,7 +53,7 @@ Just for testing.
 
 
 ---
-# GET /api/v1/:part1/test/:part2
+### GET /api/v1/:part1/test/:part2
 
 This is a test API.
 
@@ -61,54 +61,57 @@ Just for testing.
 
 
 
-## REQUEST ⮚
+#### Request
 
-### HEADERS ⮷
+
+##### Headers
 
 Name | Description
 ---- | -----------
 header1 | First header.
 header2 | Second header.
 
-### PATH ⮷
+
+##### Path
 
 Name | Description
 ---- | -----------
 part1 | First part.
 part2 | Second part.
 
-### QUERY ⮷
+
+##### Query
 
 Name | Description
 ---- | -----------
 query1 | First query.
 query2 | Second query.
 
-### BODY ⮷
+
+##### Body
 
 ```javascript
 {
     "a": String,// This is a.
     "b": String,
 }
-
 ```
+#### Response
 
-## RESPONSE ⮘
 
-### HEADERS ⮷
+##### Headers
 
 Name | Description
 ---- | -----------
 header1 | First header.
 header2 | Second header.
 
-### BODY ⮷
+
+##### Body
 
 ```javascript
 {
     "c": String,
     "d": Number,
 }
-
 ```
