@@ -7,10 +7,8 @@
 /**
  * Including modules.
  */
-const readFile = require('./readFile');
-const pickComments = require('./pickComments');
+const pickComments = require('pick-comments');
 const getStructure = require('./getStructure');
-const glob = require('glob');
 const URIDOM = require('./URIDOM');
 
 /**
@@ -52,32 +50,14 @@ const sortUridom = (a, b) => {
 module.exports = async function () {
     const uridomList = [];
 
-    const filePathList = await new Promise((resolve, reject) => {
-        glob(process.argv[2], (error, filePathList) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(filePathList);
-            }
-        });
-    });
+    const fileWithCommentAsyncIterator = await pickComments(process.argv[2], 'uri');
 
-    const childrenBranches = [];
-    for (let filePath of filePathList) {
-        childrenBranches.push(readFile(filePath)
-            .then((sourceCode) => pickComments(sourceCode, filePath))
-            .then((fileWithContentList) => {
-                const structureList = [];
-                for (const comment of fileWithContentList.commentList) {
-                    structureList.push(getStructure(comment));
-                }
-                return structureList;
-            })
-            .then((structureList) => structureList.forEach((structure) => {
-                uridomList.push(new URIDOM(structure));
-            })));
+    for await (const fileWithComment of fileWithCommentAsyncIterator) {
+        for (const comment of fileWithComment.commentList) {
+            const structure = getStructure(comment);
+            uridomList.push(new URIDOM(structure));
+        }
     }
-    await Promise.all(childrenBranches);
     uridomList.sort(sortUridom);
     return uridomList;
 };
