@@ -1,6 +1,6 @@
 {
   "name": "uridoc",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "An URI document generator which works with JSDoc-type comments.",
   "keywords": [
     "URI",
