@@ -32,6 +32,6 @@
     "uridoc": "src/index.js"
   },
   "dependencies": {
-    "pick-comments": "^1.0.0"
+    "pick-comments": "^1.0.3"
   }
 }
